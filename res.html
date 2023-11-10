@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+    document.addEventListener('contextmenu', function (e) {
+        e.preventDefault();
+    });
+    </script>
+
+</head>
+
+<body>
+
+    <div class="container">
+        <h1 class="text-center">Restaurant Management</h1>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h2>Menu</h2>
+                <ul id="menu" class="list-group">
+                    <!-- Menu items will be added dynamically using JavaScript -->
+                </ul>
+            </div>
+
+            <div class="col-md-6">
+                <h2>Place Order</h2>
+                <form id="orderForm">
+                    <div class="form-group">
+                        <label for="itemName">Item Name:</label>
+                        <input type="text" id="itemName" class="form-control" list="itemSuggestions" required>
+                        <datalist id="itemSuggestions"></datalist>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" id="quantity" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="discount">Discount (%):</label>
+                        <input type="number" id="discount" class="form-control" min="0" max="100">
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="addToOrder()">Add to Order</button>
+                    <button type="button" class="btn btn-info" onclick="completeOrder()">Complete Order</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h2>Orders</h2>
+                <ul id="orders" class="list-group">
+                    <!-- Orders will be displayed dynamically using JavaScript -->
+                </ul>
+            </div>
+
+            <div class="col-md-6">
+                <h2>Bill Summary</h2>
+                <p id="totalBill">Total Bill: ৳0.00</p>
+                <p id="discountAmount">Discount Amount: ৳0.00</p>
+                <p id="payableAmount">Payable Amount: ৳0.00</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel">Select Payment Type</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <select id="paymentType" class="form-control">
+                        <option value="Bkash">Bkash</option>
+                        <option value="Nagad">Nagad</option>
+                        <option value="Hand Cash">Hand Cash</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="paymentSuccess()">Confirm Payment</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message and Refresh Button -->
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Payment Successful!</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Thank you for your payment.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="refreshPage()">Refresh</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>All rights reserved. | Developed & Powered by <a href="https://www.facebook.com/engrsakib02/" target="_blank">MD. Nazmus Sakib</a></p>
+    </div>
+
+    <script>
+        const restaurant = {
+            menu: [
+                { name: "Burger", price: 153.25 },
+                { name: "Pizza", price: 465.75 },
+                { name: "Salad", price: 33.45 },
+                { name: "Chicken", price: 173.13 },
+                { name: "Beef", price: 351.15 },
+                { name: "Meat", price: 371.19 },
+                { name: "Naan bread", price: 35.0 },
+                { name: "Grill", price: 153.03 },
+                { name: "Kacchi", price: 173.03 }
+            ],
+            orders: [],
+            currentTotalBill: 0.0,
+            discountAmount: 0.0,
+            payableAmount: 0.0
+        };
+
+        function displayMenu() {
+            const menuList = document.getElementById("menu");
+            menuList.innerHTML = "";
+            restaurant.menu.forEach(item => {
+                const listItem = document.createElement("li");
+                listItem.className = "list-group-item";
+                listItem.textContent = `${item.name} - ৳${item.price.toFixed(2)}`;
+                menuList.appendChild(listItem);
+            });
+        }
+
+        function populateItemSuggestions() {
+            const itemSuggestions = document.getElementById("itemSuggestions");
+            itemSuggestions.innerHTML = "";
+            restaurant.menu.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.name;
+                itemSuggestions.appendChild(option);
+            });
+        }
+
+        function addToOrder() {
+            const itemName = document.getElementById("itemName").value;
+            const quantity = parseInt(document.getElementById("quantity").value);
+            const discount = parseInt(document.getElementById("discount").value) || 0;
+
+            if (isNaN(quantity) || quantity <= 0) {
+                alert("Please enter a valid quantity.");
+                return;
+            }
+
+            const menuItem = restaurant.menu.find(item => item.name === itemName);
+
+            if (menuItem) {
+                const orderItem = { name: itemName, quantity: quantity, discount: discount };
+                restaurant.orders.push(orderItem);
+                updateOrders();
+                calculateTotalBill();
+            } else {
+                alert("Item not found in the menu.");
+            }
+        }
+
+        function updateOrders() {
+            const ordersList = document.getElementById("orders");
+            ordersList.innerHTML = "";
+            restaurant.orders.forEach(item => {
+                const listItem = document.createElement("li");
+                listItem.className = "list-group-item";
+                listItem.textContent = `${item.name} - Quantity: ${item.quantity} - Discount: ${item.discount}%`;
+                ordersList.appendChild(listItem);
+            });
+        }
+
+        function calculateTotalBill() {
+            let totalBill = 0.0;
+            let discountAmount = 0.0;
+
+            restaurant.orders.forEach(order => {
+                const menuItem = restaurant.menu.find(item => item.name === order.name);
+                totalBill += order.quantity * menuItem.price;
+                discountAmount += (order.quantity * menuItem.price * order.discount) / 100;
+            });
+
+            restaurant.currentTotalBill = totalBill;
+            restaurant.discountAmount = discountAmount;
+            restaurant.payableAmount = totalBill - discountAmount;
+
+            const totalBillElement = document.getElementById("totalBill");
+            totalBillElement.textContent = `Total Bill: ৳${totalBill.toFixed(2)}`;
+
+            const discountAmountElement = document.getElementById("discountAmount");
+            discountAmountElement.textContent = `Discount Amount: ৳${discountAmount.toFixed(2)}`;
+
+            const payableAmountElement = document.getElementById("payableAmount");
+            payableAmountElement.textContent = `Payable Amount: ৳${restaurant.payableAmount.toFixed(2)}`;
+        }
+
+        function completeOrder() {
+            $('#paymentModal').modal('show');
+        }
+
+        function paymentSuccess() {
+            $('#paymentModal').modal('hide');
+            $('#successModal').modal('show');
+        }
+
+        function refreshPage() {
+            location.reload(true);
+        }
+
+        window.onload = function () {
+            displayMenu();
+            populateItemSuggestions();
+        };
+    </script>
+
+</body>
+
+</html>
