@@ -35,9 +35,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-    document.addEventListener('contextmenu', function (e) {
-        e.preventDefault();
-    });
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        });
     </script>
 
 </head>
@@ -94,219 +94,228 @@
         </div>
     </div>
 
-    <!-- Payment Modal -->
-    <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="paymentModalLabel">Select Payment Type</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+   <!-- Edit Order Modal -->
+<div class="modal fade" id="editOrderModal" tabindex="-1" role="dialog" aria-labelledby="editOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editOrderModalLabel">Edit Order</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editItemName">Item Name:</label>
+                    <input type="text" id="editItemName" class="form-control" disabled>
                 </div>
-                <div class="modal-body">
-                    <select id="paymentType" class="form-control">
-                        <option value="Bkash">Bkash</option>
-                        <option value="Nagad">Nagad</option>
-                        <option value="Hand Cash">Hand Cash</option>
-                    </select>
+                <div class="form-group">
+                    <label for="editQuantity">Quantity:</label>
+                    <input type="number" id="editQuantity" class="form-control" required>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="paymentSuccess()">Confirm Payment</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <div class="form-group">
+                    <label for="editDiscount">Discount (%):</label>
+                    <input type="number" id="editDiscount" class="form-control" min="0" max="100">
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveChanges()">Save Changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="cancelEdit()">Cancel</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Success Message and Refresh Button -->
-    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="successModalLabel">Payment Successful!</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Thank you for your payment.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="refreshPage()">Refresh</button>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="footer">
+    <p>© 2023 SAKIB. All rights Reserved. | Developed & Powered by: <a href="https://www.facebook.com/engrsakib02/" target="_blank">Md. Nazmus Sakib</a></p>
+</div>
 
-    <div class="footer">
-        <p>All rights reserved. | Developed & Powered by <a href="https://www.facebook.com/engrsakib02/" target="_blank">MD. Nazmus Sakib</a></p>
-    </div>
+    <!-- ... (previous code) ... -->
+<script>
+    const restaurant = {
+        menu: [
+            { name: "Burger", price: 153.25 },
+            { name: "Pizza", price: 465.75 },
+            { name: "Salad", price: 33.45 },
+            { name: "Chicken", price: 173.13 },
+            { name: "Beef", price: 351.15 },
+            { name: "Meat", price: 371.19 },
+            { name: "Naan bread", price: 35.0 },
+            { name: "Grill", price: 153.03 },
+            { name: "Kacchi", price: 173.03 }
+        ],
+        orders: [],
+        currentTotalBill: 0.0,
+        discountAmount: 0.0,
+        payableAmount: 0.0,
+        editingIndex: -1
+    };
 
-    <script>
-        const restaurant = {
-            menu: [
-                { name: "Burger", price: 153.25 },
-                { name: "Pizza", price: 465.75 },
-                { name: "Salad", price: 33.45 },
-                { name: "Chicken", price: 173.13 },
-                { name: "Beef", price: 351.15 },
-                { name: "Meat", price: 371.19 },
-                { name: "Naan bread", price: 35.0 },
-                { name: "Grill", price: 153.03 },
-                { name: "Kacchi", price: 173.03 }
-            ],
-            orders: [],
-            currentTotalBill: 0.0,
-            discountAmount: 0.0,
-            payableAmount: 0.0
-        };
+    function displayMenu() {
+        const menuList = document.getElementById("menu");
+        menuList.innerHTML = "";
+        restaurant.menu.forEach(item => {
+            const listItem = document.createElement("li");
+            listItem.className = "list-group-item";
+            listItem.textContent = `${item.name} - ৳${item.price.toFixed(2)}`;
+            menuList.appendChild(listItem);
+        });
+    }
 
-        function displayMenu() {
-            const menuList = document.getElementById("menu");
-            menuList.innerHTML = "";
-            restaurant.menu.forEach(item => {
-                const listItem = document.createElement("li");
-                listItem.className = "list-group-item";
-                listItem.textContent = `${item.name} - ৳${item.price.toFixed(2)}`;
-                menuList.appendChild(listItem);
-            });
+    function populateItemSuggestions() {
+        const itemSuggestions = document.getElementById("itemSuggestions");
+        itemSuggestions.innerHTML = "";
+        restaurant.menu.forEach(item => {
+            const option = document.createElement("option");
+            option.value = item.name;
+            itemSuggestions.appendChild(option);
+        });
+    }
+
+    function addToOrder() {
+        const itemName = document.getElementById("itemName").value;
+        const quantity = parseInt(document.getElementById("quantity").value);
+        const discount = parseInt(document.getElementById("discount").value) || 0;
+
+        if (isNaN(quantity) || quantity <= 0) {
+            alert("Please enter a valid quantity.");
+            return;
         }
 
-        function populateItemSuggestions() {
-            const itemSuggestions = document.getElementById("itemSuggestions");
-            itemSuggestions.innerHTML = "";
-            restaurant.menu.forEach(item => {
-                const option = document.createElement("option");
-                option.value = item.name;
-                itemSuggestions.appendChild(option);
-            });
+        const menuItem = restaurant.menu.find(item => item.name === itemName);
+
+        if (menuItem) {
+            const orderItem = { name: itemName, quantity: quantity, discount: discount };
+            restaurant.orders.push(orderItem);
+            updateOrders();
+            calculateTotalBill();
+        } else {
+            alert("Item not found in the menu.");
+        }
+    }
+
+    function updateOrders() {
+        const ordersList = document.getElementById("orders");
+        ordersList.innerHTML = "";
+        restaurant.orders.forEach((item, index) => {
+            const listItem = document.createElement("li");
+            listItem.className = "list-group-item";
+            listItem.textContent = `${item.name} - Quantity: ${item.quantity} - Discount: ${item.discount}%`;
+
+            // Add edit and delete buttons
+            const editButton = document.createElement("button");
+            editButton.textContent = "Edit";
+            editButton.className = "btn btn-warning btn-sm ml-2";
+            editButton.onclick = () => editOrder(index);
+
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.className = "btn btn-danger btn-sm ml-2";
+            deleteButton.onclick = () => deleteOrder(index);
+
+            listItem.appendChild(editButton);
+            listItem.appendChild(deleteButton);
+
+            ordersList.appendChild(listItem);
+        });
+    }
+
+    function calculateTotalBill() {
+        let totalBill = 0.0;
+        let discountAmount = 0.0;
+
+        restaurant.orders.forEach(order => {
+            const menuItem = restaurant.menu.find(item => item.name === order.name);
+            totalBill += order.quantity * menuItem.price;
+            discountAmount += (order.quantity * menuItem.price * order.discount) / 100;
+        });
+
+        restaurant.currentTotalBill = totalBill;
+        restaurant.discountAmount = discountAmount;
+        restaurant.payableAmount = totalBill - discountAmount;
+
+        const totalBillElement = document.getElementById("totalBill");
+        totalBillElement.textContent = `Total Bill: ৳${totalBill.toFixed(2)}`;
+
+        const discountAmountElement = document.getElementById("discountAmount");
+        discountAmountElement.textContent = `Discount Amount: ৳${discountAmount.toFixed(2)}`;
+
+        const payableAmountElement = document.getElementById("payableAmount");
+        payableAmountElement.textContent = `Payable Amount: ৳${restaurant.payableAmount.toFixed(2)}`;
+    }
+
+    function completeOrder() {
+        $('#paymentModal').modal('show');
+    }
+
+    function paymentSuccess() {
+        $('#paymentModal').modal('hide');
+        $('#successModal').modal('show');
+    }
+
+    function refreshPage() {
+        location.reload(true);
+    }
+
+    function editOrder(index) {
+        restaurant.editingIndex = index;
+        const order = restaurant.orders[index];
+
+        // Populate the modal with the selected order details
+        document.getElementById("editItemName").value = order.name;
+        document.getElementById("editQuantity").value = order.quantity;
+        document.getElementById("editDiscount").value = order.discount;
+
+        // Display the modal
+        $('#editOrderModal').modal('show');
+    }
+
+    function saveChanges() {
+        const itemName = document.getElementById("editItemName").value;
+        const quantity = parseInt(document.getElementById("editQuantity").value);
+        const discount = parseInt(document.getElementById("editDiscount").value) || 0;
+
+        if (isNaN(quantity) || quantity <= 0) {
+            alert("Please enter a valid quantity.");
+            return;
         }
 
-        function addToOrder() {
-            const itemName = document.getElementById("itemName").value;
-            const quantity = parseInt(document.getElementById("quantity").value);
-            const discount = parseInt(document.getElementById("discount").value) || 0;
+        const menuItem = restaurant.menu.find(item => item.name === itemName);
 
-            if (isNaN(quantity) || quantity <= 0) {
-                alert("Please enter a valid quantity.");
-                return;
-            }
+        if (menuItem) {
+            const orderItem = { name: itemName, quantity: quantity, discount: discount };
+            restaurant.orders[restaurant.editingIndex] = orderItem;
+            updateOrders();
+            calculateTotalBill();
 
-            const menuItem = restaurant.menu.find(item => item.name === itemName);
-
-            if (menuItem) {
-                const orderItem = { name: itemName, quantity: quantity, discount: discount };
-                restaurant.orders.push(orderItem);
-                updateOrders();
-                calculateTotalBill();
-            } else {
-                alert("Item not found in the menu.");
-            }
+            // Hide the modal
+            $('#editOrderModal').modal('hide');
+        } else {
+            alert("Item not found in the menu.");
         }
+    }
 
-        function updateOrders() {
-            const ordersList = document.getElementById("orders");
-            ordersList.innerHTML = "";
-            restaurant.orders.forEach(item => {
-                const listItem = document.createElement("li");
-                listItem.className = "list-group-item";
-                listItem.textContent = `${item.name} - Quantity: ${item.quantity} - Discount: ${item.discount}%`;
-                ordersList.appendChild(listItem);
-            });
+    function cancelEdit() {
+        // Reset the modal and hide it
+        $('#editOrderModal').modal('hide');
+    }
+
+    function deleteOrder(index) {
+        const confirmDelete = confirm("Are you sure you want to delete this order?");
+        if (confirmDelete) {
+            restaurant.orders.splice(index, 1);
+            updateOrders();
+            calculateTotalBill();
         }
+    }
 
-        function calculateTotalBill() {
-            let totalBill = 0.0;
-            let discountAmount = 0.0;
+    window.onload = function () {
+        displayMenu();
+        populateItemSuggestions();
+    };
+</script>
 
-            restaurant.orders.forEach(order => {
-                const menuItem = restaurant.menu.find(item => item.name === order.name);
-                totalBill += order.quantity * menuItem.price;
-                discountAmount += (order.quantity * menuItem.price * order.discount) / 100;
-            });
 
-            restaurant.currentTotalBill = totalBill;
-            restaurant.discountAmount = discountAmount;
-            restaurant.payableAmount = totalBill - discountAmount;
-
-            const totalBillElement = document.getElementById("totalBill");
-            totalBillElement.textContent = `Total Bill: ৳${totalBill.toFixed(2)}`;
-
-            const discountAmountElement = document.getElementById("discountAmount");
-            discountAmountElement.textContent = `Discount Amount: ৳${discountAmount.toFixed(2)}`;
-
-            const payableAmountElement = document.getElementById("payableAmount");
-            payableAmountElement.textContent = `Payable Amount: ৳${restaurant.payableAmount.toFixed(2)}`;
-        }
-
-        function completeOrder() {
-            $('#paymentModal').modal('show');
-        }
-
-        function paymentSuccess() {
-            $('#paymentModal').modal('hide');
-            $('#successModal').modal('show');
-        }
-
-        function refreshPage() {
-            location.reload(true);
-        }
-
-        window.onload = function () {
-            displayMenu();
-            populateItemSuggestions();
-        };
- // ... (previous code) ...
-
-        function editOrder(index) {
-            const newName = prompt("Enter the new item name:");
-            if (newName) {
-                restaurant.orders[index].name = newName;
-                updateOrders();
-                calculateTotalBill();
-            }
-        }
-
-        function deleteOrder(index) {
-            const confirmDelete = confirm("Are you sure you want to delete this order?");
-            if (confirmDelete) {
-                restaurant.orders.splice(index, 1);
-                updateOrders();
-                calculateTotalBill();
-            }
-        }
-
-        // ... (previous code) ...
-
-        function updateOrders() {
-            const ordersList = document.getElementById("orders");
-            ordersList.innerHTML = "";
-            restaurant.orders.forEach((item, index) => {
-                const listItem = document.createElement("li");
-                listItem.className = "list-group-item";
-                listItem.textContent = `${item.name} - Quantity: ${item.quantity} - Discount: ${item.discount}%`;
-
-                // Add edit and delete buttons
-                const editButton = document.createElement("button");
-                editButton.textContent = "Edit";
-                editButton.className = "btn btn-warning btn-sm ml-2";
-                editButton.onclick = () => editOrder(index);
-
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "Delete";
-                deleteButton.className = "btn btn-danger btn-sm ml-2";
-                deleteButton.onclick = () => deleteOrder(index);
-
-                listItem.appendChild(editButton);
-                listItem.appendChild(deleteButton);
-
-                ordersList.appendChild(listItem);
-            });
-        }
-    </script>
 
 </body>
 
