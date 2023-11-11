@@ -259,6 +259,53 @@
             displayMenu();
             populateItemSuggestions();
         };
+ // ... (previous code) ...
+
+        function editOrder(index) {
+            const newName = prompt("Enter the new item name:");
+            if (newName) {
+                restaurant.orders[index].name = newName;
+                updateOrders();
+                calculateTotalBill();
+            }
+        }
+
+        function deleteOrder(index) {
+            const confirmDelete = confirm("Are you sure you want to delete this order?");
+            if (confirmDelete) {
+                restaurant.orders.splice(index, 1);
+                updateOrders();
+                calculateTotalBill();
+            }
+        }
+
+        // ... (previous code) ...
+
+        function updateOrders() {
+            const ordersList = document.getElementById("orders");
+            ordersList.innerHTML = "";
+            restaurant.orders.forEach((item, index) => {
+                const listItem = document.createElement("li");
+                listItem.className = "list-group-item";
+                listItem.textContent = `${item.name} - Quantity: ${item.quantity} - Discount: ${item.discount}%`;
+
+                // Add edit and delete buttons
+                const editButton = document.createElement("button");
+                editButton.textContent = "Edit";
+                editButton.className = "btn btn-warning btn-sm ml-2";
+                editButton.onclick = () => editOrder(index);
+
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Delete";
+                deleteButton.className = "btn btn-danger btn-sm ml-2";
+                deleteButton.onclick = () => deleteOrder(index);
+
+                listItem.appendChild(editButton);
+                listItem.appendChild(deleteButton);
+
+                ordersList.appendChild(listItem);
+            });
+        }
     </script>
 
 </body>
